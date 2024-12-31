@@ -7,6 +7,7 @@ import DialogDetailImage from './DialogDetailImage';
 import { ThreadTypes } from 'types/thread.types';
 import { toggleLikeThread } from 'api/interactionApi';
 import useThreadStore from 'store/ThreadStore';
+import MenuUpdateAndDelete from './UpdateAndDeleteMenu';
 
 interface PostProps {
   threads: ThreadTypes[];
@@ -96,19 +97,20 @@ export default function CardPost({
             pt={4}
             px={4}
           >
-            <Link
-              to={`/status/${thread.id}`}
-              state={{ from: window.location.pathname }}
-            >
-              <Box display={'flex'} flexDirection={'row'} p={0}>
-                <Link to={''}>
-                  <Avatar
-                    size={'sm'}
-                    src={thread.author.avatarImage || undefined}
-                    name={thread.author.fullname}
-                  />
-                </Link>
-                <Box display={'flex'} flexDirection={'column'} pl={3}>
+            <Box display={'flex'} flexDirection={'row'} p={0}>
+              <Link to={''}>
+                <Avatar
+                  size={'sm'}
+                  src={thread.author.avatarImage || undefined}
+                  name={thread.author.fullname}
+                />
+              </Link>
+              <Box display={'flex'} flexDirection={'column'} pl={3}>
+                <Box
+                  display={'flex'}
+                  flexDirection={'row'}
+                  justifyContent={'space-between'}
+                >
                   <HStack mb={1} gap="2" color={'white'}>
                     <Link to={''}>
                       <Text fontWeight="semibold" textStyle="sm">
@@ -122,23 +124,31 @@ export default function CardPost({
                       • {thread.duration}
                     </Text>
                   </HStack>
-                  <Box color={'white'}>{thread.content}</Box>
-                  <Box pt={2}>
-                    {thread.image && (
-                      <Box width="full" height="300px" overflow="hidden">
-                        <Image
-                          src={thread.image}
-                          width="full"
-                          height="full"
-                          objectFit="cover"
-                          objectPosition="center"
-                        />
-                      </Box>
-                    )}
-                  </Box>
+                  <MenuUpdateAndDelete />
                 </Box>
+                <Link
+                  to={`/status/${thread.id}`}
+                  state={{ from: window.location.pathname }}
+                >
+                  <Box>
+                    <Box color={'white'}>{thread.content}</Box>
+                    <Box pt={2}>
+                      {thread.image && (
+                        <Box width="full" height="300px" overflow="hidden">
+                          <Image
+                            src={thread.image}
+                            width="full"
+                            height="full"
+                            objectFit="cover"
+                            objectPosition="center"
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </Link>
               </Box>
-            </Link>
+            </Box>
 
             <HStack pl={12} pb={2} gap={5}>
               <Button

@@ -86,3 +86,24 @@ export const toggleFollowUser = async (followingId: number, token: string) => {
     throw error;
   }
 };
+
+export const toggleReplyLike = async (replyId: number, token: string) => {
+  try {
+    const res: AxiosResponse = await axios.post(
+      `${API_ENDPOINTS.INTERACTION}/reply/like/${replyId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || 'Something went wrong');
+    } else {
+      throw error;
+    }
+  }
+};

@@ -1,9 +1,10 @@
-import { Box, Button, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Text } from '@chakra-ui/react';
 import { Avatar } from './ui/avatar';
 import useUserStore from 'store/UserStore';
 import { toggleFollowUser } from 'api/interactionApi';
 import { getAllUsers } from 'api/userApi';
 import { useEffect } from 'react';
+import HoverCardComponent from './HoverCardUser';
 
 function Suggestion() {
   const { user, setUser } = useUserStore();
@@ -80,6 +81,7 @@ function Suggestion() {
           flexDirection="row"
           alignItems="center"
           p={0}
+          position="relative"
         >
           <Avatar
             size="sm"
@@ -95,15 +97,16 @@ function Suggestion() {
             pl={3}
             color="white"
             width="full"
+            position={'relative'}
           >
-            <Stack gap="normal">
-              <Text fontWeight="semibold" textStyle="sm">
-                {suggestion.fullname}
-              </Text>
-              <Text color="whiteAlpha.600" textStyle="sm">
-                @{suggestion.username}
-              </Text>
-            </Stack>
+            <HoverCardComponent
+              fullname={suggestion.fullname}
+              username={suggestion.username}
+              avatarImage={suggestion.avatarImage}
+              bio={suggestion.bio}
+              followersCount={suggestion.followersCount}
+              followingCount={suggestion.followingCount}
+            />
             <Button
               height="6"
               fontSize="11px"

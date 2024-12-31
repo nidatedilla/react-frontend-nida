@@ -13,6 +13,7 @@ import {
   createReply,
   getThreadReplies,
   toggleLikeThread,
+  toggleReplyLike,
 } from 'api/interactionApi';
 
 function Status() {
@@ -43,8 +44,8 @@ function Status() {
         try {
           const replyData = await getThreadReplies(threadId, token);
 
-          console.log("Reply:", replyData);
-          
+          console.log('Reply:', replyData);
+
           setReplies(replyData);
         } catch (err) {
           console.error('Error fetching replies:', err);
@@ -99,11 +100,38 @@ function Status() {
             },
             likesCount: 0,
             isLiked: false,
-            duration: newReply.duration,          },
+            duration: newReply.duration,
+          },
         ]);
       } catch (error) {
         console.error('Error creating reply:', error);
       }
+    }
+  };
+
+  const handleToggleReplyLike = async (replyId: number) => {
+    const token = localStorage.getItem('token') || '';
+
+    try {
+      const updatedData = await toggleReplyLike(replyId, token);
+
+      if (updatedData) {
+        setReplies((prevReplies) =>
+          prevReplies.map((reply) =>
+            reply.id === replyId
+              ? {
+                  ...reply,
+                  isLiked: updatedData.isLiked,
+                  likesCount: updatedData.isLiked
+                    ? reply.likesCount + 1
+                    : reply.likesCount - 1,
+                }
+              : reply
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling reply like:', error);
     }
   };
 
@@ -138,7 +166,12 @@ function Status() {
           threadId={threadId}
         />
       </Box>
-      {threadId && <CardReply replies={replies} />}{' '}
+      {threadId && (
+        <CardReply
+          replies={replies}
+          onToggleReplyLike={handleToggleReplyLike}
+        />
+      )}
     </Box>
   );
 }

@@ -4,11 +4,12 @@ export interface ReplyTypes {
   image:string;
   createdAt: string;
   duration: string;
-  author: {
+  author: { 
     id: number;
     username: string;
     fullname: string;
     avatarImage: string | null;
   };
+  isLiked:boolean;
   likesCount: number;
 }

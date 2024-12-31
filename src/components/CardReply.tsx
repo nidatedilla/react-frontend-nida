@@ -1,14 +1,18 @@
 import { Box, Button, HStack, Image, Text } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { Avatar } from './ui/avatar';
-import { HiOutlineHeart } from 'react-icons/hi2';
+import { HiHeart, HiOutlineHeart } from 'react-icons/hi2';
 import { ReplyTypes } from 'types/reply.types';
 
 interface CardReplyProps {
   replies: ReplyTypes[];
+  onToggleReplyLike: (replyId: number) => void;
 }
 
-export default function CardReply({ replies }: CardReplyProps) {
+export default function CardReply({
+  replies,
+  onToggleReplyLike,
+}: CardReplyProps) {
   if (replies.length === 0) {
     return (
       <Text color="whiteAlpha.600" px={4} py={4}>
@@ -71,10 +75,13 @@ export default function CardReply({ replies }: CardReplyProps) {
             fontWeight="normal"
             pl={12}
             justifyContent={'start'}
-            color={'whiteAlpha.600'}
+            color={r.isLiked ? 'red.500' : 'whiteAlpha.600'}
+            onClick={() => onToggleReplyLike(r.id)}
           >
-            <HiOutlineHeart />
-            <Text color="whiteAlpha.600">{r.likesCount}</Text>
+            {r.isLiked ? <HiHeart /> : <HiOutlineHeart />}
+            <Text color="whiteAlpha.600">
+              {r.likesCount.toLocaleString('id-ID')}
+            </Text>
           </Button>
         </Box>
       ))}

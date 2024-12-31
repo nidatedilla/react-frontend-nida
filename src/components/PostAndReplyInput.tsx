@@ -2,7 +2,6 @@ import { Box, Button, IconButton, Image, Input } from '@chakra-ui/react';
 import { Avatar } from './ui/avatar';
 import { LuImagePlus } from 'react-icons/lu';
 import { useState } from 'react';
-import Swal from 'sweetalert2';
 import { useLoadingStore } from 'store/LoadingStore';
 
 interface PostAndReplyInputProps {
@@ -36,21 +35,6 @@ export default function PostAndReplyInput({
   const setIsLoading = useLoadingStore((state) => state.setIsLoading);
 
   const handleSubmit = async () => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: `Do you want to ${onReply ? 'reply' : 'create this post'}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes!',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#48BB78',
-      cancelButtonColor: 'dark',
-      background: '#2c2c2c',
-      color: '#ffffff',
-    });
-
-    if (!result.isConfirmed) return;
-
     setIsLoading(true);
 
     if (content.trim() || image) {
