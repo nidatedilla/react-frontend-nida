@@ -20,7 +20,11 @@ import { useEffect, useState } from 'react';
 import { ThreadTypes } from 'types/thread.types';
 import useUserStore from 'store/UserStore';
 import { ReplyTypes } from 'types/reply.types';
-import { createReply, getThreadReplies } from 'api/interactionApi';
+import {
+  createReply,
+  getThreadReplies,
+  toggleReplyLike,
+} from 'api/interactionApi';
 
 interface DialogDetailImageProps {
   children: React.ReactNode;
@@ -71,6 +75,32 @@ const DialogDetailImage: React.FC<DialogDetailImageProps> = ({
       } catch (error) {
         console.error('Error creating reply:', error);
       }
+    }
+  };
+
+  const handleToggleReplyLike = async (replyId: number) => {
+    const token = localStorage.getItem('token') || '';
+
+    try {
+      const updatedData = await toggleReplyLike(replyId, token);
+
+      if (updatedData) {
+        setReplies((prevReplies) =>
+          prevReplies.map((reply) =>
+            reply.id === replyId
+              ? {
+                  ...reply,
+                  isLiked: updatedData.isLiked,
+                  likesCount: updatedData.isLiked
+                    ? reply.likesCount + 1
+                    : reply.likesCount - 1,
+                }
+              : reply
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling reply like:', error);
     }
   };
 
@@ -192,7 +222,10 @@ const DialogDetailImage: React.FC<DialogDetailImageProps> = ({
                 />
               </Box>
               <Box flex={1} overflow="auto">
-                <CardReply replies={replies} />
+                <CardReply
+                  replies={replies}
+                  onToggleReplyLike={handleToggleReplyLike}
+                />
               </Box>
             </Box>
           </Box>
