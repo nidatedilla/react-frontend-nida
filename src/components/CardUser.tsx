@@ -13,7 +13,7 @@ export default function CardUser({ listUser, toggleFollow }: CardUserProps) {
     <Box>
       {listUser.map((user) => (
         <HStack key={user.id} alignItems={'start'} pb={2}>
-          <Link to={''}>
+          <Link to={`/profile/${user.id}`}>
             <Avatar size={'sm'} src={user.avatarImage} name={user.fullname} />
           </Link>
           <Box
@@ -23,7 +23,7 @@ export default function CardUser({ listUser, toggleFollow }: CardUserProps) {
             width={'full'}
           >
             <Stack mb={1} gap={0} color={'white'}>
-              <Link to={''}>
+            <Link to={`/profile/${user.id}`}>
                 <Text fontWeight="semibold" textStyle="sm">
                   {user.fullname}
                 </Text>

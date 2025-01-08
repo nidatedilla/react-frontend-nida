@@ -34,21 +34,29 @@ export default function Follow() {
   const handleToggleFollow = async (followingId: number) => {
     try {
       await toggleFollowUser(followingId, token!);
-
+  
       const updatedFollowableUsers = user?.followableUsers.map((u) =>
         u.id === followingId ? { ...u, isFollowed: !u.isFollowed } : u
       );
-
+  
+      const updatedFollowingCount = user?.followingCount ?? 0;
+      const newFollowingCount = updatedFollowableUsers?.find(
+        (u) => u.id === followingId
+      )?.isFollowed
+        ? updatedFollowingCount + 1
+        : updatedFollowingCount - 1;
+  
       if (updatedFollowableUsers) {
         setUser({
           ...user!,
           followableUsers: updatedFollowableUsers,
+          followingCount: newFollowingCount,
         });
       }
     } catch (error) {
       console.error('Error toggling follow:', error);
     }
-  };
+  };  
 
   const followers =
     user?.followableUsers?.filter((u) => u.isFollowedByTarget) || [];

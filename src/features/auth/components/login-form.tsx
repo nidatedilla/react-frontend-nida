@@ -119,7 +119,7 @@ export const LoginForm: React.FC = () => {
           </Box>
           <Link
             style={{ fontSize: 'sm', textAlign: 'end', color: 'white' }}
-            to="/forgotPassword"
+            to="/forgot-password"
             color={'white'}
           >
             Forgot password?

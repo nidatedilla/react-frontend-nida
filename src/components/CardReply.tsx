@@ -3,15 +3,22 @@ import { Link } from 'react-router-dom';
 import { Avatar } from './ui/avatar';
 import { HiHeart, HiOutlineHeart } from 'react-icons/hi2';
 import { ReplyTypes } from 'types/reply.types';
+import MenuDelete from './MenuDeleteReply';
 
 interface CardReplyProps {
   replies: ReplyTypes[];
   onToggleReplyLike: (replyId: number) => void;
+  onReplyDeleted: (replyId: number) => void;
+  currentUserId: number;
+  threadOwnerId: number;
 }
 
 export default function CardReply({
   replies,
   onToggleReplyLike,
+  onReplyDeleted,
+  currentUserId,
+  threadOwnerId,
 }: CardReplyProps) {
   if (replies.length === 0) {
     return (
@@ -33,7 +40,7 @@ export default function CardReply({
           pt={4}
           px={4}
         >
-          <Box display={'flex'} flexDirection={'row'} p={0}>
+          <Box display={'flex'} flexDirection={'row'} alignItems={'flex-start'}>
             <Link to={''}>
               <Avatar
                 size={'sm'}
@@ -41,34 +48,48 @@ export default function CardReply({
                 name={r.author.fullname}
               />
             </Link>
-            <Box display={'flex'} flexDirection={'column'} pl={3}>
-              <HStack mb={1} gap="2" color={'white'}>
-                <Link to={''}>
-                  <Text fontWeight="semibold" textStyle="sm">
-                    {r.author.fullname}
+            <Box flex={'1'}>
+              <Box
+                display={'flex'}
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                ml={3}
+              >
+                <HStack gap="2" color={'white'}>
+                  <Link to={''}>
+                    <Text fontWeight="semibold" textStyle="sm">
+                      {r.author.fullname}
+                    </Text>
+                  </Link>
+                  <Text color="whiteAlpha.600" textStyle="sm">
+                    @{r.author.username}
                   </Text>
-                </Link>
-                <Text color="whiteAlpha.600" textStyle="sm">
-                  @{r.author.username}
-                </Text>
-                <Text as={'span'} color="whiteAlpha.600" textStyle="sm">
-                  • {r.duration}
-                </Text>
-              </HStack>
-              <Box color={'white'}>{r.content}</Box>
-              {r.image && (
-                <Box pt={2}>
-                  <Box width="full" height="200px" overflow="hidden">
-                    <Image
-                      src={r.image}
-                      width="full"
-                      height="full"
-                      objectFit="cover"
-                      objectPosition="center"
-                    />
-                  </Box>
+                  <Text as={'span'} color="whiteAlpha.600" textStyle="sm">
+                    • {r.duration}
+                  </Text>
+                </HStack>
+                {(currentUserId === r.author.id || currentUserId === threadOwnerId) && (
+                  <MenuDelete replyId={r.id} onReplyDeleted={onReplyDeleted} />
+                )}
+              </Box>
+              <Box ml={'3'}>
+                <Box color={'white'} fontSize={'14px'}>
+                  {r.content}
                 </Box>
-              )}
+                {r.image && (
+                  <Box pt={2}>
+                    <Box width="300px" height="200px" overflow="hidden">
+                      <Image
+                        src={r.image}
+                        width="auto"
+                        height="full"
+                        objectFit="cover"
+                        objectPosition="center"
+                      />
+                    </Box>
+                  </Box>
+                )}
+              </Box>
             </Box>
           </Box>
           <Button

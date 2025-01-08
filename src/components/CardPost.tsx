@@ -1,4 +1,13 @@
-import { Box, Button, HStack, Image, SimpleGrid, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  HStack,
+  Image,
+  SimpleGrid,
+  Text,
+} from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import { Avatar } from './ui/avatar';
 import { HiHeart, HiOutlineHeart } from 'react-icons/hi2';
@@ -7,7 +16,8 @@ import DialogDetailImage from './DialogDetailImage';
 import { ThreadTypes } from 'types/thread.types';
 import { toggleLikeThread } from 'api/interactionApi';
 import useThreadStore from 'store/ThreadStore';
-import MenuUpdateAndDelete from './UpdateAndDeleteMenu';
+import MenuUpdateAndDelete from './MenuUpdateAndDeleteThread';
+import { HiOutlinePhotograph } from 'react-icons/hi';
 
 interface PostProps {
   threads: ThreadTypes[];
@@ -47,11 +57,13 @@ export default function CardPost({
     }
   };
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
   return (
     <Box>
       {displayOnlyImages ? (
         threads.length ? (
-          <SimpleGrid pt={4} px={4} columns={{ base: 2, md: 3, lg: 3 }} gap={3}>
+          <SimpleGrid p={4} columns={{ base: 2, md: 3, lg: 3 }} gap={2}>
             {threads.map((thread) =>
               thread.image ? (
                 <DialogDetailImage
@@ -65,7 +77,6 @@ export default function CardPost({
                     height="200px"
                     position="relative"
                     overflow="hidden"
-                    mb={4}
                   >
                     <Image
                       src={thread.image}
@@ -80,9 +91,18 @@ export default function CardPost({
             )}
           </SimpleGrid>
         ) : (
-          <Text mx={4} my={4}>
-            No media found
-          </Text>
+          <Center h="300px">
+            <Flex
+              flexDirection={'column'}
+              alignItems={'center'}
+              textAlign={'center'}
+            >
+              <HiOutlinePhotograph size={50} color="gray" />
+              <Text color="whiteAlpha.500" fontSize="lg" mt={4}>
+                No media found
+              </Text>
+            </Flex>
+          </Center>
         )
       ) : (
         threads.map((thread) => (
@@ -97,22 +117,34 @@ export default function CardPost({
             pt={4}
             px={4}
           >
-            <Box display={'flex'} flexDirection={'row'} p={0}>
-              <Link to={''}>
+            <Box
+              display={'flex'}
+              flexDirection={'row'}
+              alignItems={'flex-start'}
+            >
+              <Link to={`/profile/${thread.author.id}`}>
                 <Avatar
                   size={'sm'}
                   src={thread.author.avatarImage || undefined}
                   name={thread.author.fullname}
+                  mr={3}
                 />
               </Link>
-              <Box display={'flex'} flexDirection={'column'} pl={3}>
+
+              <Box flex="1">
                 <Box
-                  display={'flex'}
-                  flexDirection={'row'}
-                  justifyContent={'space-between'}
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
                 >
-                  <HStack mb={1} gap="2" color={'white'}>
-                    <Link to={''}>
+                  <HStack gap="2" color="white">
+                    <Link
+                      to={
+                        currentUser.id === thread.author.id
+                          ? `/profile`
+                          : `/profile/${thread.author.id}`
+                      }
+                    >
                       <Text fontWeight="semibold" textStyle="sm">
                         {thread.author.fullname}
                       </Text>
@@ -124,27 +156,39 @@ export default function CardPost({
                       • {thread.duration}
                     </Text>
                   </HStack>
-                  <MenuUpdateAndDelete />
+                  {currentUser.id === thread.author.id && (
+                    <MenuUpdateAndDelete
+                      threadId={thread.id}
+                      content={thread.content}
+                      image={thread.image || ''}
+                    />
+                  )}
                 </Box>
+
                 <Link
                   to={`/status/${thread.id}`}
                   state={{ from: window.location.pathname }}
                 >
                   <Box>
-                    <Box color={'white'}>{thread.content}</Box>
-                    <Box pt={2}>
-                      {thread.image && (
-                        <Box width="full" height="300px" overflow="hidden">
-                          <Image
-                            src={thread.image}
-                            width="full"
-                            height="full"
-                            objectFit="cover"
-                            objectPosition="center"
-                          />
-                        </Box>
-                      )}
+                    <Box color={'white'} mb={2}>
+                      {thread.content}
                     </Box>
+                    {thread.image && (
+                      <Box
+                        width="full"
+                        height="300px"
+                        overflow="hidden"
+                        borderRadius="md"
+                      >
+                        <Image
+                          src={thread.image}
+                          width="full"
+                          height="full"
+                          objectFit="cover"
+                          objectPosition="center"
+                        />
+                      </Box>
+                    )}
                   </Box>
                 </Link>
               </Box>
@@ -158,7 +202,6 @@ export default function CardPost({
                 onClick={() => handleToggleLike(thread.id)}
               >
                 {thread.isLiked ? <HiHeart /> : <HiOutlineHeart />}
-
                 <Text color="whiteAlpha.600">
                   {(thread.likesCount ?? 0).toLocaleString('id-ID')}
                 </Text>

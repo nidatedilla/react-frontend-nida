@@ -4,11 +4,15 @@ import { LoginFormProps } from '../types/AuthTypes';
 
 export const fetchLogin = async (data: LoginFormProps) => {
   try {
-    const res: AxiosResponse = await axios.post(API_ENDPOINTS.LOGIN, data, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const res: AxiosResponse = await axios.post(
+      `${API_ENDPOINTS.AUTH}/login`,
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     return res.data;
   } catch (error) {
@@ -29,7 +33,7 @@ export const registerUser = async (
   password: string
 ) => {
   try {
-    const response = await axios.post(API_ENDPOINTS.REGISTER, {
+    const response = await axios.post(`${API_ENDPOINTS.AUTH}/register`, {
       fullname,
       email,
       username,
@@ -42,5 +46,28 @@ export const registerUser = async (
     } else {
       throw new Error('An unexpected error occurred');
     }
+  }
+};
+
+export const forgotPassword = async (email: string) => {
+  try {
+    const response = await axios.post(`${API_ENDPOINTS.AUTH}/forgot-password`, {
+      email,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  try {
+    const response = await axios.post(`${API_ENDPOINTS.AUTH}/reset-password`, {
+      token,
+      newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 };

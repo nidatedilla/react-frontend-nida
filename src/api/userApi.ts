@@ -35,6 +35,23 @@ export const getCurrentUser = async (token: string) => {
   }
 };
 
+export const getUserById = async (id: number, token: string) => {
+  try {
+    const res: AxiosResponse = await axios.get(`${API_ENDPOINTS.USERS}/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || 'Something went wrong');
+    } else {
+      throw error;
+    }
+  }
+};
+
 export const updateUserData = async (updatedUserData: any) => {
   const token = localStorage.getItem('token');
 

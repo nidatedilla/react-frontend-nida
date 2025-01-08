@@ -1,50 +1,103 @@
-import { Box, Button, Card, Center, Flex, Image, Tabs, Text } from '@chakra-ui/react';
+import { Box, Card, Center, Flex, Image, Tabs, Text } from '@chakra-ui/react';
 import { Avatar } from 'components/ui/avatar';
 import CardPost from 'components/CardPost';
-import useUserStore from 'store/UserStore';
-import DialogEditProfile from 'components/DialogEditProfile';
-import { useEffect } from 'react';
-import { getThreadsByUser } from 'api/threadApi';
-import { getCurrentUser } from 'api/userApi';
+import { useEffect, useState } from 'react';
+import { getThreadsByUserId } from 'api/threadApi';
+import { getUserById } from 'api/userApi';
 import useThreadStore from 'store/ThreadStore';
+import { useParams } from 'react-router-dom';
+import { User } from 'types/user.types';
+import { Button } from './ui/button';
+import { toggleFollowUser } from 'api/interactionApi';
+import useUserStore from 'store/UserStore';
 import { LuFileText, LuUser } from 'react-icons/lu';
 
-function Profile() {
-  const user = useUserStore((state) => state.user);
-  const setUser = useUserStore((state) => state.setUser);
+function ProfileOtherUser() {
+  const { id } = useParams();
+  const { user: loggedInUser, setUser: setLoggedInUser } = useUserStore();
+  const [user, setUser] = useState<User | null>(null);
   const { threads, setThreads } = useThreadStore();
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (token) {
+    const fetchUserDataById = async () => {
+      if (token && id) {
         try {
-          const userData = await getCurrentUser(token);
-          console.log('User Data:', userData);
+          const userData = await getUserById(parseInt(id), token);
+          console.log('Other User:', userData);
           setUser(userData);
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          console.error('Error fetching user data by ID:', error);
         }
       }
     };
 
-    fetchUserData();
-  }, [token, setUser]);
+    fetchUserDataById();
+  }, [id, token]);
 
   useEffect(() => {
-    const fetchUserThreads = async () => {
-      if (token) {
+    const fetchUserThreadsById = async () => {
+      if (token && id) {
         try {
-          const userThreads = await getThreadsByUser(token);
-          setThreads(userThreads);
+          const userThreadsById = await getThreadsByUserId(parseInt(id), token);
+          console.log('User Threads:', userThreadsById);
+          if (Array.isArray(userThreadsById)) {
+            setThreads(userThreadsById);
+          } else if (
+            userThreadsById &&
+            userThreadsById.threads &&
+            Array.isArray(userThreadsById.threads)
+          ) {
+            setThreads(userThreadsById.threads);
+          } else {
+            setThreads([]);
+          }
         } catch (error) {
-          console.error('Error fetching user threads:', error);
+          console.error('Error fetching user threads by ID:', error);
+          setThreads([]);
         }
       }
     };
 
-    fetchUserThreads();
-  }, [token, setThreads, threads]);
+    fetchUserThreadsById();
+  }, [id, token, setThreads]);
+
+  const handleToggleFollow = async (followingId: number) => {
+    try {
+      if (user && loggedInUser && token) {
+        await toggleFollowUser(followingId, token);
+
+        const updatedIsFollowed = !user.isFollowed;
+        const updatedFollowableUsers = loggedInUser?.followableUsers.map((u) =>
+          u.id === followingId ? { ...u, isFollowed: !u.isFollowed } : u
+        );
+
+        const updatedFollowersCount = user.followersCount ?? 0;
+        const newFollowersCount = updatedIsFollowed
+          ? updatedFollowersCount + 1
+          : updatedFollowersCount - 1;
+
+        const updatedFollowingCount = loggedInUser.followingCount ?? 0;
+        const newFollowingCount = updatedIsFollowed
+          ? updatedFollowingCount + 1
+          : updatedFollowingCount - 1;
+
+        setUser({
+          ...user,
+          isFollowed: updatedIsFollowed,
+          followersCount: newFollowersCount,
+        });
+
+        setLoggedInUser({
+          ...loggedInUser,
+          followableUsers: updatedFollowableUsers,
+          followingCount: newFollowingCount,
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+    }
+  };
 
   return (
     <Card.Root
@@ -91,12 +144,29 @@ function Profile() {
                 height={'7'}
                 px={3}
                 borderWidth={'1px'}
-                borderColor={'white'}
+                borderColor={
+                  user.isFollowed
+                    ? 'whiteAlpha.600'
+                    : user.isFollowedByTarget
+                      ? 'green.500'
+                      : 'white'
+                }
+                color={
+                  user.isFollowed
+                    ? 'whiteAlpha.600'
+                    : user.isFollowedByTarget
+                      ? 'green.500'
+                      : 'white'
+                }
                 borderRadius={'full'}
                 insetY={'-1'}
-                onClick={() => {}}
+                onClick={() => handleToggleFollow(user.id)}
               >
-                <DialogEditProfile />
+                {user.isFollowed
+                  ? 'Following'
+                  : user.isFollowedByTarget
+                    ? 'Follow Back'
+                    : 'Follow'}
               </Button>
             </Box>
             <Text fontSize={'17px'} pt={2}>
@@ -140,18 +210,14 @@ function Profile() {
           <Tabs.Trigger
             value="allPost"
             color="whiteAlpha.500"
-            _selected={{
-              color: 'white',
-            }}
+            _selected={{ color: 'white' }}
           >
             All Posts
           </Tabs.Trigger>
           <Tabs.Trigger
             value="media"
             color="whiteAlpha.500"
-            _selected={{
-              color: 'white',
-            }}
+            _selected={{ color: 'white' }}
           >
             Media
           </Tabs.Trigger>
@@ -170,7 +236,7 @@ function Profile() {
               >
                 <LuFileText size={50} color="gray" />
                 <Text color="whiteAlpha.500" fontSize="lg" mt={4}>
-                  No threads found
+                  No threads found for this user
                 </Text>
               </Box>
             </Center>
@@ -187,4 +253,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default ProfileOtherUser;

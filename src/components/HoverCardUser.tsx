@@ -4,13 +4,14 @@ import {
   HoverCardContent,
   HoverCardRoot,
   HoverCardTrigger,
-  Link,
   Stack,
   Text,
 } from '@chakra-ui/react';
 import { Avatar } from './ui/avatar';
+import { Link } from 'react-router-dom';
 
 interface HoverCardProps {
+  id: number;
   fullname: string;
   username: string;
   avatarImage?: string;
@@ -20,6 +21,7 @@ interface HoverCardProps {
 }
 
 const HoverCardComponent: React.FC<HoverCardProps> = ({
+  id,
   fullname,
   username,
   avatarImage,
@@ -32,33 +34,34 @@ const HoverCardComponent: React.FC<HoverCardProps> = ({
       <HoverCardTrigger asChild>
         <Box position="relative">
           <Stack gap="normal">
-            <Link
-              href="#"
-              fontWeight="semibold"
-              textStyle="sm"
-              color="white"
-              _hover={{ textDecoration: 'none' }}
-            >
-              {fullname}
+            <Link to={`/profile/${id}`}>
+              <Text
+                fontWeight="semibold"
+                textStyle="sm"
+                color="white"
+                _hover={{ textDecoration: 'none' }}
+              >
+                {fullname}
+              </Text>
             </Link>
-            <Link
-              href="#"
-              color="whiteAlpha.600"
-              textStyle="sm"
-              _hover={{ textDecoration: 'none' }}
-            >
-              @{username}
+            <Link to={`/profile/${id}`}>
+              <Text
+                color="whiteAlpha.600"
+                textStyle="sm"
+                _hover={{ textDecoration: 'none' }}
+              >
+                @{username}
+              </Text>
             </Link>
           </Stack>
         </Box>
       </HoverCardTrigger>
       <HoverCardContent
-        bg="blackAlpha.900"
+        bg="blackAlpha.800"
         p={4}
         borderRadius="lg"
         zIndex="popover"
         position="absolute"
-        bottom="100%"
         left="50%"
         transform="translateX(-50%)"
       >

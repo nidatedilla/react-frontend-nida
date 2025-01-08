@@ -17,6 +17,7 @@ export interface User {
   username: string;
   fullname: string;
   avatarImage: string;
+  coverImage: string;
   bio: string;
   isFollowed: boolean;
   isFollowedByTarget: boolean;

@@ -107,3 +107,18 @@ export const toggleReplyLike = async (replyId: number, token: string) => {
     }
   }
 };
+
+export const deleteReply = async (replyId: number, token: string) => {
+  try {
+    const response = await axios.delete(`${API_ENDPOINTS.INTERACTION}/reply/${replyId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting reply:', error);
+    throw error;
+  }
+};

@@ -1,9 +1,12 @@
+import React from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Flex, Input, Text, VStack } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { forgotPassword } from '../services/auth-service';
+import { useLoadingStore } from 'store/LoadingStore';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,17 +23,34 @@ const ForgotPasswordForm: React.FC = () => {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = (data: ForgotPasswordFormInputs) => {
-    console.log(data);
-    Swal.fire({
-      title: 'Success!',
-      text: 'Password reset instructions have been sent to your email.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#48BB78',
-      background: '#2c2c2c',
-      color: '#ffffff',
-    });
+  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
+
+  const onSubmit = async (data: ForgotPasswordFormInputs) => {
+    try {
+      setIsLoading(true);
+      await forgotPassword(data.email);
+      Swal.fire({
+        title: 'Success!',
+        text: 'Password reset instructions have been sent to your email.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#48BB78',
+        background: '#2c2c2c',
+        color: '#ffffff',
+      });
+    } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'An error occurred while sending password reset instructions.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#d9534f',
+        background: '#2c2c2c',
+        color: '#ffffff',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

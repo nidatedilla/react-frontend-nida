@@ -18,7 +18,6 @@ import { HiHeart, HiOutlineHeart } from 'react-icons/hi2';
 import { LuMessageCircle, LuExpand } from 'react-icons/lu';
 import { useEffect, useState } from 'react';
 import { ThreadTypes } from 'types/thread.types';
-import useUserStore from 'store/UserStore';
 import { ReplyTypes } from 'types/reply.types';
 import {
   createReply,
@@ -39,7 +38,7 @@ const DialogDetailImage: React.FC<DialogDetailImageProps> = ({
   threads,
   handleToggleLike,
 }) => {
-  const user = useUserStore((state) => state.user);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   const token = localStorage.getItem('token');
   const thread = threads.find((t) => t.id === threadId);
   const [replies, setReplies] = useState<ReplyTypes[]>([]);
@@ -102,6 +101,10 @@ const DialogDetailImage: React.FC<DialogDetailImageProps> = ({
     } catch (error) {
       console.error('Error toggling reply like:', error);
     }
+  };
+
+  const handleDeleteReply = (replyId: number) => {
+    setReplies((prevReplies) => prevReplies.filter((reply) => reply.id !== replyId));
   };
 
   if (!thread)
@@ -221,10 +224,31 @@ const DialogDetailImage: React.FC<DialogDetailImageProps> = ({
                   threadId={threadId}
                 />
               </Box>
-              <Box flex={1} overflow="auto">
+              <Box
+                flex={1}
+                overflowY="auto"
+                css={{
+                  '&::-webkit-scrollbar': {
+                    width: '10px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'gray.700',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: 'gray.800',
+                    borderRadius: 'md',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: 'gray.600',
+                  },
+                }}
+              >
                 <CardReply
                   replies={replies}
                   onToggleReplyLike={handleToggleReplyLike}
+                  onReplyDeleted={handleDeleteReply}
+                  currentUserId={user.id}
+                  threadOwnerId={thread?.author.id || 0}
                 />
               </Box>
             </Box>

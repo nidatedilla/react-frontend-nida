@@ -3,11 +3,10 @@ import CardPost from 'components/CardPost';
 import PostAndReplyInput from 'components/PostAndReplyInput';
 import { useEffect } from 'react';
 import { createThread, getAllThreads } from 'api/threadApi';
-import useUserStore from 'store/UserStore';
 import useThreadStore from 'store/ThreadStore';
 
 function Home() {
-  const user = useUserStore((state) => state.user);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   const { threads, setThreads } = useThreadStore();
   const token = localStorage.getItem('token');
 

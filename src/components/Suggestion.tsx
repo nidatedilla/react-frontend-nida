@@ -13,7 +13,7 @@ function Suggestion() {
   useEffect(() => {
     if (!token) return;
 
-    const fetchUsers = async () => {
+    const fetchUsers = async () => { 
       try {
         if (!user?.followableUsers) {
           const users = await getAllUsers(token);
@@ -34,21 +34,22 @@ function Suggestion() {
   const handleToggleFollow = async (followingId: number) => {
     try {
       await toggleFollowUser(followingId, token!);
-
+  
       const updatedFollowableUsers = user?.followableUsers.map((u) =>
         u.id === followingId ? { ...u, isFollowed: !u.isFollowed } : u
       );
-
-      if (updatedFollowableUsers) {
-        setUser({
-          ...user!,
-          followableUsers: updatedFollowableUsers,
-        });
-      }
+  
+      const updatedUser = {
+        ...user!,
+        followableUsers: updatedFollowableUsers ?? [],
+        followingCount: (user?.followingCount ?? 0) + 1,
+      };
+  
+      setUser(updatedUser);
     } catch (error) {
       console.error('Error toggling follow:', error);
     }
-  };
+  };    
 
   const sortedSuggestions = user?.followableUsers
     ?.filter((u) => !u.isFollowed)
@@ -100,6 +101,7 @@ function Suggestion() {
             position={'relative'}
           >
             <HoverCardComponent
+              id={suggestion.id}
               fullname={suggestion.fullname}
               username={suggestion.username}
               avatarImage={suggestion.avatarImage}

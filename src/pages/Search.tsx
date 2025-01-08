@@ -42,10 +42,18 @@ export default function Search() {
         u.id === followingId ? { ...u, isFollowed: !u.isFollowed } : u
       );
 
+      const updatedFollowingCount = user?.followingCount ?? 0;
+      const newFollowingCount = updatedFollowableUsers?.find(
+        (u) => u.id === followingId
+      )?.isFollowed
+        ? updatedFollowingCount + 1
+        : updatedFollowingCount - 1;
+
       if (updatedFollowableUsers) {
         setUser({
           ...user!,
           followableUsers: updatedFollowableUsers,
+          followingCount: newFollowingCount,
         });
       }
     } catch (error) {
@@ -56,8 +64,8 @@ export default function Search() {
   const filteredUsers = Array.isArray(user?.followableUsers)
     ? user.followableUsers.filter(
         (u) =>
-          u.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          u.username.toLowerCase().includes(searchQuery.toLowerCase())
+          (u.fullname && u.fullname.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (u.username && u.username.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : [];
 
@@ -98,10 +106,10 @@ export default function Search() {
             typed.
           </Text>
         </Box>
-      ) : filteredUsers?.length ? (
+      ) : filteredUsers.length ? (
         filteredUsers.map((user) => (
           <HStack key={user.id} alignItems={'start'} pb={2}>
-            <Link to={''}>
+            <Link to={`/profile/${user.id}`}>
               <Avatar size={'sm'} src={user.avatarImage} name={user.fullname} />
             </Link>
             <Box
@@ -111,7 +119,7 @@ export default function Search() {
               width={'full'}
             >
               <Stack mb={1} gap={0} color={'white'}>
-                <Link to={''}>
+                <Link to={`/profile/${user.id}`}>
                   <Text fontWeight="semibold" textStyle="sm">
                     {user.fullname}
                   </Text>
@@ -132,15 +140,15 @@ export default function Search() {
                   user.isFollowed
                     ? 'whiteAlpha.600'
                     : user.isFollowedByTarget
-                      ? 'green.500'
-                      : 'white'
+                    ? 'green.500'
+                    : 'white'
                 }
                 color={
                   user.isFollowed
                     ? 'whiteAlpha.600'
                     : user.isFollowedByTarget
-                      ? 'green.500'
-                      : 'white'
+                    ? 'green.500'
+                    : 'white'
                 }
                 borderRadius={'full'}
                 onClick={() => handleToggleFollow(user.id)}
@@ -148,8 +156,8 @@ export default function Search() {
                 {user.isFollowed
                   ? 'Following'
                   : user.isFollowedByTarget
-                    ? 'Follow Back'
-                    : 'Follow'}
+                  ? 'Follow Back'
+                  : 'Follow'}
               </Button>
             </Box>
           </HStack>

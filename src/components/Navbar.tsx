@@ -18,6 +18,7 @@ import DialogCreatePost from './DialogCreatePost';
 import Swal from 'sweetalert2';
 
 type navbarProps = { onClick: () => void };
+
 const Navbar: React.FC<navbarProps> = ({ onClick }) => {
   const [activeTab, setActiveTab] = useState<string>('');
 

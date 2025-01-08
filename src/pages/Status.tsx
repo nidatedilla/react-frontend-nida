@@ -3,7 +3,6 @@ import PostAndReplyInput from 'components/PostAndReplyInput';
 import CardReply from 'components/CardReply';
 import { LuArrowLeft } from 'react-icons/lu';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import useUserStore from 'store/UserStore';
 import { useEffect, useState } from 'react';
 import { getThreadById } from 'api/threadApi';
 import { CardStatus } from 'components/CardStatus';
@@ -17,7 +16,7 @@ import {
 } from 'api/interactionApi';
 
 function Status() {
-  const user = useUserStore((state) => state.user);
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
   const location = useLocation();
   const previousPage = location.state?.from || '/';
@@ -88,26 +87,41 @@ function Status() {
     if (threadId && token) {
       try {
         const newReply = await createReply({ content, image }, threadId, token);
-
-        setReplies((prevReplies) => [
-          ...prevReplies,
-          {
-            ...newReply,
-            author: {
-              fullname: user?.fullname || 'User',
-              avatarImage: user?.avatarImage || '',
-              username: user?.username || '',
+  
+        setReplies((prevReplies) => {
+          const updatedReplies = [
+            {
+              ...newReply,
+              author: {
+                fullname: user?.fullname || 'User',
+                avatarImage: user?.avatarImage || '',
+                username: user?.username || '',
+              },
+              likesCount: 0,
+              isLiked: false,
+              duration: newReply.duration,
             },
-            likesCount: 0,
-            isLiked: false,
-            duration: newReply.duration,
-          },
-        ]);
+            ...prevReplies,
+          ];
+  
+          return updatedReplies.sort((a, b) => (b.createdAt) - (a.createdAt));
+        });
+  
+        setThread((prevThread) => {
+          if (prevThread?.id === threadId) {
+            return {
+              ...prevThread,
+              repliesCount: prevThread.repliesCount + 1,
+            };
+          }
+          return prevThread;
+        });
       } catch (error) {
         console.error('Error creating reply:', error);
       }
     }
   };
+  
 
   const handleToggleReplyLike = async (replyId: number) => {
     const token = localStorage.getItem('token') || '';
@@ -133,6 +147,19 @@ function Status() {
     } catch (error) {
       console.error('Error toggling reply like:', error);
     }
+  };
+
+  const handleDeleteReply = (replyId: number) => {
+    setReplies((prevReplies) => prevReplies.filter((reply) => reply.id !== replyId));
+    setThread((prevThread) => {
+      if (prevThread) {
+        return {
+          ...prevThread,
+          repliesCount: prevThread.repliesCount - 1,
+        };
+      }
+      return prevThread;
+    });
   };
 
   return (
@@ -170,6 +197,9 @@ function Status() {
         <CardReply
           replies={replies}
           onToggleReplyLike={handleToggleReplyLike}
+          onReplyDeleted={handleDeleteReply}
+          currentUserId={user.id}
+          threadOwnerId={thread?.author.id || 0}
         />
       )}
     </Box>
