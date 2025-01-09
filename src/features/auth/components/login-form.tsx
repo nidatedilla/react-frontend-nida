@@ -8,6 +8,7 @@ import { fetchLogin } from '../services/auth-service';
 import useUserStore from 'store/UserStore';
 import { LoginFormProps } from '../types/AuthTypes';
 import Swal from 'sweetalert2';
+import { useLoadingStore } from 'store/LoadingStore';
 
 const loginSchema = z.object({
   identifier: z
@@ -29,6 +30,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
+  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
 
   const {
     register,
@@ -39,7 +41,8 @@ export const LoginForm: React.FC = () => {
   });
 
   const onSubmit = (data: LoginFormProps) => {
-    console.log(data);
+    setIsLoading(true);
+
     fetchLogin(data)
       .then((res) => {
         console.log(res);
@@ -47,7 +50,7 @@ export const LoginForm: React.FC = () => {
           setUser(res.user);
           localStorage.setItem('user', JSON.stringify(res.user));
           localStorage.setItem('token', res.token);
-  
+
           Swal.fire({
             title: 'Success!',
             text: 'You have successfully logged in.',
@@ -57,6 +60,7 @@ export const LoginForm: React.FC = () => {
             background: '#2c2c2c',
             color: '#ffffff',
           }).then(() => {
+            setIsLoading(false);
             navigate('/');
           });
         }
@@ -72,6 +76,8 @@ export const LoginForm: React.FC = () => {
           background: '#2c2c2c',
           color: '#ffffff',
         });
+      }).finally(() => {
+        setIsLoading(false);
       });
   };
 

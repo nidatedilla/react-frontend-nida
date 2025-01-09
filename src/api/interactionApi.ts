@@ -11,6 +11,8 @@ export const getThreadReplies = async (threadId: number, token: string) => {
         },
       }
     );
+    console.log("Replies:", res.data);
+    
     return res.data.replies;
   } catch (error) {
     console.error('Error fetching replies:', error);
@@ -41,7 +43,8 @@ export const createReply = async (
         },
       }
     );
-    return response.data;
+    
+    return response.data.reply;
   } catch (error) {
     console.error('Error creating reply:', error);
     throw error;

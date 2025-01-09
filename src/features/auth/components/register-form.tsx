@@ -8,6 +8,7 @@ import { z } from 'zod';
 import useUserStore from 'store/UserStore';
 import { registerUser } from '../services/auth-service';
 import Swal from 'sweetalert2';
+import { useLoadingStore } from 'store/LoadingStore';
 
 const registerSchema = z.object({
   fullname: z.string().min(3, 'Full name must be at least 3 characters'),
@@ -21,6 +22,7 @@ type RegisterFormInputs = z.infer<typeof registerSchema>;
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
   const { setUser } = useUserStore();
+  const setIsLoading = useLoadingStore((state) => state.setIsLoading);
 
   const {
     register,
@@ -31,12 +33,13 @@ export const RegisterForm: React.FC = () => {
   });
 
   const onSubmit = async (data: RegisterFormInputs) => {
+    setIsLoading(true);
     try {
       const res = await registerUser(
         data.fullname,
         data.email,
         data.username,
-        data.password,
+        data.password
       );
 
       console.log('Register response:', res);
@@ -54,6 +57,7 @@ export const RegisterForm: React.FC = () => {
           background: '#2c2c2c',
           color: '#ffffff',
         }).then(() => {
+          setIsLoading(false);
           navigate('/login');
         });
       } else {
@@ -79,6 +83,8 @@ export const RegisterForm: React.FC = () => {
         background: '#2c2c2c',
         color: '#ffffff',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

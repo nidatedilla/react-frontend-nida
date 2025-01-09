@@ -87,12 +87,13 @@ function Status() {
     if (threadId && token) {
       try {
         const newReply = await createReply({ content, image }, threadId, token);
-  
+
         setReplies((prevReplies) => {
           const updatedReplies = [
             {
               ...newReply,
               author: {
+                id: user.id,
                 fullname: user?.fullname || 'User',
                 avatarImage: user?.avatarImage || '',
                 username: user?.username || '',
@@ -103,10 +104,10 @@ function Status() {
             },
             ...prevReplies,
           ];
-  
-          return updatedReplies.sort((a, b) => (b.createdAt) - (a.createdAt));
+
+          return updatedReplies.sort((a, b) => b.createdAt - a.createdAt);
         });
-  
+
         setThread((prevThread) => {
           if (prevThread?.id === threadId) {
             return {
@@ -121,7 +122,6 @@ function Status() {
       }
     }
   };
-  
 
   const handleToggleReplyLike = async (replyId: number) => {
     const token = localStorage.getItem('token') || '';
@@ -150,7 +150,9 @@ function Status() {
   };
 
   const handleDeleteReply = (replyId: number) => {
-    setReplies((prevReplies) => prevReplies.filter((reply) => reply.id !== replyId));
+    setReplies((prevReplies) =>
+      prevReplies.filter((reply) => reply.id !== replyId)
+    );
     setThread((prevThread) => {
       if (prevThread) {
         return {
